@@ -13,7 +13,6 @@
 # ~ You should have received a copy of the GNU General Public License
 # ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-button = {}
 # see in krita source: krita/krita.action
 # also https://scripting.krita.org/icon-library
 # "toolAction": "tool_icon_name",
@@ -43,6 +42,7 @@ class tooly(DockWidget):
 		box.setSpacing(0)
 		mainWidget.setLayout(box)
 		
+		button = {}
 		for tool in tools:
 			button[tool] = QPushButton("", mainWidget)
 			button[tool].clicked.connect(self.press(tool, button))
