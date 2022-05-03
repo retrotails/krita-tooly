@@ -31,6 +31,21 @@ tools = {
 from PyQt5.QtWidgets import *
 from krita import *
 
+# https://github.com/C-Radius/Krita-Settings/
+def find_tool_box():
+	qwindow = Krita.instance().activeWindow().qwindow()
+	for qobj in qwindow.findChildren(QWidget):
+		if qobj.metaObject().className() == "KoToolBox":
+			return qobj
+def getCurrentTool():
+	tool_box = find_tool_box()
+	for qobj in tool_box.findChildren(QToolButton):
+		if qobj.metaObject().className() == "KoToolBoxButton":
+			if qobj.isChecked():
+				return qobj.objectName()
+
+
+
 class tooly(DockWidget):
 
 	def __init__(self):
@@ -42,23 +57,41 @@ class tooly(DockWidget):
 		box.setSpacing(0)
 		mainWidget.setLayout(box)
 		
-		button = {}
+		self.button = {}
 		for tool in tools:
-			button[tool] = QPushButton("", mainWidget)
-			button[tool].clicked.connect(self.press(tool, button))
-			button[tool].setFixedSize(QSize(48, 48))
-			button[tool].setIcon(QtGui.QIcon(Application.icon(tools[tool])))
-			mainWidget.layout().addWidget(button[tool])
-
-	def press(self, tool, button):
+			self.button[tool] = QPushButton("", mainWidget)
+			self.button[tool].clicked.connect(self.press(tool))
+			self.button[tool].setFixedSize(QSize(48, 48))
+			self.button[tool].setIcon(QtGui.QIcon(Application.icon(tools[tool])))
+			mainWidget.layout().addWidget(self.button[tool])
+		# run self.setup after the window is initialized,
+		#  cause right now the toolbox doesn't even exist
+		Krita.instance().notifier().windowCreated.connect(self.setup)
+	
+	def setup(self):
+		tool_box = find_tool_box()
+		for qobj in tool_box.findChildren(QToolButton):
+			if qobj.metaObject().className() == "KoToolBoxButton":
+				qobj.toggled.connect(self.tool_toggled)
+	
+	def tool_toggled(self,true):
+		if true:
+			new_tool = getCurrentTool()
+			# un-highlight now-deselected tool
+			if getattr(self, "button_last", None) is not None:
+				if self.button_last != new_tool:
+					self.button[self.button_last].setStyleSheet("")
+			# highlight selected tool
+			if new_tool in tools:
+				self.button[new_tool].setStyleSheet("background-color: gray")
+				self.button_last = new_tool
+			else:
+				self.button_last = None
+	
+	def press(self, tool):
 		def thing(): # stupid python quirks
 			ins = Krita.instance().action(tool)
 			if ins is not None:
-				button[tool].setStyleSheet("background-color: gray")
-				if getattr(self, "button_last", None) is not None:
-					if self.button_last !=  tool:
-						button[self.button_last].setStyleSheet("")
-				self.button_last = tool
 				ins.trigger()
 		return thing
 
