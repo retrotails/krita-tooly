@@ -13,6 +13,22 @@
 # ~ You should have received a copy of the GNU General Public License
 # ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+button = {}
+# see in krita source: krita/krita.action
+# also https://scripting.krita.org/icon-library
+# "toolAction": "tool_icon_name",
+tools = {
+	"KritaShape/KisToolBrush":           "krita_tool_freehand",
+	"KritaSelected/KisToolColorSampler": "krita_tool_color_sampler",
+	"KritaFill/KisToolFill":             "krita_tool_color_fill",
+	"KritaTransform/KisToolMove":        "krita_tool_move",
+	"KisToolTransform":                  "krita_tool_transform",
+	"KisToolSelectRectangular":          "tool_rect_selection",
+	"KisToolSelectPolygonal":            "tool_polygonal_selection",
+	"KisToolSelectOutline":              "tool_outline_selection",
+	"KisToolSelectContiguous":           "tool_contiguous_selection",
+}
+
 from PyQt5.QtWidgets import *
 from krita import *
 
@@ -27,20 +43,6 @@ class tooly(DockWidget):
 		box.setSpacing(0)
 		mainWidget.setLayout(box)
 		
-		button = {}
-		# see in krita source: krita/krita.action
-		# "toolAction": "tool_icon_name",
-		tools = {
-			"KritaShape/KisToolBrush":			"krita_tool_freehand",
-			"KritaSelected/KisToolColorPicker":	"krita_tool_color_picker",
-			"KritaFill/KisToolFill":			"krita_tool_color_fill",
-			"KritaTransform/KisToolMove":		"krita_tool_move",
-			"KisToolTransform":					"krita_tool_transform",
-			"KisToolSelectRectangular":			"tool_rect_selection",
-			"KisToolSelectPolygonal":			"tool_polygonal_selection",
-			"KisToolSelectOutline":				"tool_outline_selection",
-			"KisToolSelectContiguous":			"tool_contiguous_selection",
-		}
 		for tool in tools:
 			button[tool] = QPushButton("", mainWidget)
 			button[tool].clicked.connect(self.press(tool, button))
